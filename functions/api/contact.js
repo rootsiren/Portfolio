@@ -13,7 +13,10 @@ export async function onRequest(context) {
 
   // Only allow POST
   if (context.request.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405, headers });
+    return new Response('Method not allowed', { 
+      status: 405, 
+      headers 
+    });
   }
 
   try {
@@ -31,7 +34,10 @@ export async function onRequest(context) {
     if (!SERVICE_ID || !TEMPLATE_ID || !PUBLIC_KEY) {
       return new Response(
         JSON.stringify({ error: 'EmailJS keys not configured' }),
-        { status: 500, headers: { ...headers, 'Content-Type': 'application/json' } }
+        { 
+          status: 500, 
+          headers: { ...headers, 'Content-Type': 'application/json' } 
+        }
       );
     }
 
@@ -54,22 +60,32 @@ export async function onRequest(context) {
       }),
     });
 
+    const result = await response.json();
+
     if (response.ok) {
       return new Response(
         JSON.stringify({ success: true, message: 'Email sent successfully!' }),
-        { status: 200, headers: { ...headers, 'Content-Type': 'application/json' } }
+        { 
+          status: 200, 
+          headers: { ...headers, 'Content-Type': 'application/json' } 
+        }
       );
     } else {
-      const errorText = await response.text();
       return new Response(
-        JSON.stringify({ error: 'Failed to send email', details: errorText }),
-        { status: 500, headers: { ...headers, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Failed to send email', details: result }),
+        { 
+          status: 500, 
+          headers: { ...headers, 'Content-Type': 'application/json' } 
+        }
       );
     }
   } catch (error) {
     return new Response(
       JSON.stringify({ error: 'Server error', details: error.message }),
-      { status: 500, headers: { ...headers, 'Content-Type': 'application/json' } }
+      { 
+        status: 500, 
+        headers: { ...headers, 'Content-Type': 'application/json' } 
+      }
     );
   }
 }
