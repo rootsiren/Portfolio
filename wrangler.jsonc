@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "portfolio",
+  "compatibility_date": "2026-09-03",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "not_found_handling": "single-page-application"
+  },
+  "pages": {
+    "build": {
+      "command": "npm run build",
+      "directory": "dist"
+    }
+  },
+  "vars": {
+    "VITE_EMAILJS_SERVICE_ID": "service_ehgxaso",
+    "VITE_EMAILJS_TEMPLATE_ID": "template_3k2jo9y",
+    "VITE_EMAILJS_PUBLIC_KEY": "Jukiy-tdmExEkN5Qh"
+  }
+}
