@@ -8,7 +8,6 @@ import Typed from 'typed.js';
 import { motion } from 'framer-motion';
 import Particles from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
-import emailjs from '@emailjs/browser';
 
 function App() {
   // ===== SCROLL STATE =====
@@ -17,20 +16,11 @@ function App() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [copied, setCopied] = useState(false);
 
-  // ===== EMAILJS STATE =====
+  // ===== CONTACT FORM STATE =====
   const formRef = useRef();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
 
-  
-const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-
-
-if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
-  console.warn('⚠️ EmailJS keys are missing. Check your .env file.');
-}
   // ===== REFS =====
   const nameRef = useRef(null);
   const titleRef = useRef(null);
@@ -97,30 +87,36 @@ if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // ===== SEND EMAIL =====
-  const sendEmail = (e) => {
+  // ===== SEND EMAIL (via Cloudflare Pages Function) =====
+  const sendEmail = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus(null);
 
-    emailjs.sendForm(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID,
-      formRef.current,
-      EMAILJS_PUBLIC_KEY
-    ).then(
-      () => {
+    const formData = new FormData(formRef.current);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
         setSubmitStatus('success');
-        setIsSubmitting(false);
         formRef.current.reset();
-        setTimeout(() => setSubmitStatus(null), 5000);
-      },
-      () => {
+      } else {
         setSubmitStatus('error');
-        setIsSubmitting(false);
-        setTimeout(() => setSubmitStatus(null), 5000);
+        console.error('Error:', result);
       }
-    );
+    } catch (error) {
+      setSubmitStatus('error');
+      console.error('Error:', error);
+    }
+
+    setIsSubmitting(false);
+    setTimeout(() => setSubmitStatus(null), 5000);
   };
 
   // ===== DATA =====
@@ -159,7 +155,6 @@ if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
     'Java', 'Python', 'Angular', 'React', 'MySQL', 'Machine Learning', 'Linux'
   ];
 
- 
   // ===== ANIMATION VARIANTS =====
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
@@ -216,7 +211,7 @@ if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
         </div>
       </nav>
 
-      {/* ===== main ===== */}
+      {/* ===== HERO ===== */}
       <motion.section
         initial="hidden"
         whileInView="visible"
@@ -282,7 +277,7 @@ if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
                 <Eye size={22} />
               </a>
               <a 
-                href="Shreenidhi_resume.pdf" 
+                href="/Shreenidhi_resume.pdf" 
                 download 
                 className="text-gray-400 hover:text-white transition p-2 border border-white/10 rounded-lg hover:border-white/30"
                 title="Download Resume"
@@ -347,7 +342,6 @@ if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
         </div>
       </motion.section>
 
-     
       {/* ===== SERVICES ===== */}
       <motion.section
         initial="hidden"
@@ -447,43 +441,43 @@ if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
       </motion.section>
 
       {/* ===== PROJECTS ===== */}
-<motion.section
-  initial="hidden"
-  whileInView="visible"
-  viewport={{ once: true }}
-  variants={fadeInUp}
-  id="work"
-  className="py-20 px-6 max-w-6xl mx-auto border-t border-white/5 relative z-10"
->
-  <div className="text-center mb-12">
-    <h2 className="text-4xl font-bold">Featured <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Projects</span></h2>
-    <p className="text-gray-500 mt-2">A selection of work I'm proud of</p>
-  </div>
-  <div className="grid md:grid-cols-2 gap-6">
-    {projects.map((project, index) => (
-      <div key={index} className="tilt-card bg-white/5 border border-white/5 rounded-xl p-6 hover:bg-white/10 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10 transition-all">
-        <div className="flex justify-between items-start mb-3">
-          <h3 className="text-xl font-bold">{project.title}</h3>
-          <span className="text-xs px-3 py-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-full text-blue-400 whitespace-nowrap ml-2">
-            {project.highlight}
-          </span>
+      <motion.section
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={fadeInUp}
+        id="work"
+        className="py-20 px-6 max-w-6xl mx-auto border-t border-white/5 relative z-10"
+      >
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold">Featured <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Projects</span></h2>
+          <p className="text-gray-500 mt-2">A selection of work I'm proud of</p>
         </div>
-        <p className="text-gray-400 text-sm mb-4">{project.description}</p>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {project.tech.map((tech, i) => (
-            <span key={i} className="text-xs px-3 py-1 bg-white/5 rounded-full text-gray-300 border border-white/5 hover:border-blue-500/20 transition">{tech}</span>
+        <div className="grid md:grid-cols-2 gap-6">
+          {projects.map((project, index) => (
+            <div key={index} className="tilt-card bg-white/5 border border-white/5 rounded-xl p-6 hover:bg-white/10 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10 transition-all">
+              <div className="flex justify-between items-start mb-3">
+                <h3 className="text-xl font-bold">{project.title}</h3>
+                <span className="text-xs px-3 py-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-full text-blue-400 whitespace-nowrap ml-2">
+                  {project.highlight}
+                </span>
+              </div>
+              <p className="text-gray-400 text-sm mb-4">{project.description}</p>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {project.tech.map((tech, i) => (
+                  <span key={i} className="text-xs px-3 py-1 bg-white/5 rounded-full text-gray-300 border border-white/5 hover:border-blue-500/20 transition">{tech}</span>
+                ))}
+              </div>
+              {project.link && (
+                <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
+                  View Project <ExternalLink size={14} />
+                </a>
+              )}
+            </div>
           ))}
         </div>
-      
-        {project.link && (
-          <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
-            View Project <ExternalLink size={14} />
-          </a>
-        )}
-      </div>
-    ))}
-  </div>
-</motion.section>
+      </motion.section>
+
       {/* ===== ABOUT ===== */}
       <motion.section
         initial="hidden"
@@ -561,7 +555,6 @@ if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
           <p className="text-gray-500 mt-2">Have a project? Let's talk.</p>
         </div>
 
-        {/* Contact info cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white/5 border border-white/5 rounded-xl p-4 text-center hover:border-blue-500/30 transition">
             <Mail size={20} className="text-blue-400 mx-auto mb-2" />
@@ -631,7 +624,7 @@ if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
               disabled={isSubmitting}
               className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg font-medium transition flex items-center justify-center gap-2 group disabled:opacity-50"
             >
-              {isSubmitting ? 'Sending...' : 'Send Message '}
+              {isSubmitting ? 'Sending...' : 'Send Message'}
               <ArrowRight size={18} className="group-hover:translate-x-1 transition" />
             </button>
             
