@@ -6,8 +6,8 @@ import {
 } from 'lucide-react';
 import Typed from 'typed.js';
 import { motion } from 'framer-motion';
-import Particles from 'react-tsparticles';
-import { loadSlim } from 'tsparticles-slim';
+import Particles from '@tsparticles/react';
+import { loadSlim } from '@tsparticles/slim';
 import emailjs from '@emailjs/browser';
 
 function App() {
