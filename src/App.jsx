@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import emailjs from '@emailjs/browser';
 import { 
   Github, Linkedin, Mail, ExternalLink, Code, Database, 
   Cloud, Shield, Award, GraduationCap, Briefcase, Download,
@@ -8,6 +9,10 @@ import Typed from 'typed.js';
 import { motion } from 'framer-motion';
 import Particles from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
+
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
 function App() {
   // ===== SCROLL STATE =====
@@ -87,36 +92,31 @@ function App() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // ===== SEND EMAIL (via Cloudflare Pages Function) =====
+  // ===== SEND EMAIL (via EmailJS) =====
   const sendEmail = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus(null);
 
-    const formData = new FormData(formRef.current);
-
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        body: formData,
-      });
+      await emailjs.sendForm(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        formRef.current,
+        {
+          publicKey: EMAILJS_PUBLIC_KEY,
+        }
+      );
 
-      const result = await response.json();
-
-      if (response.ok) {
-        setSubmitStatus('success');
-        formRef.current.reset();
-      } else {
-        setSubmitStatus('error');
-        console.error('Error:', result);
-      }
+      setSubmitStatus('success');
+      formRef.current.reset();
     } catch (error) {
       setSubmitStatus('error');
-      console.error('Error:', error);
+      console.error('EmailJS Error:', error);
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => setSubmitStatus(null), 5000);
     }
-
-    setIsSubmitting(false);
-    setTimeout(() => setSubmitStatus(null), 5000);
   };
 
   // ===== DATA =====
